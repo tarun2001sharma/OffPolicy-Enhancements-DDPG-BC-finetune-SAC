@@ -47,7 +47,7 @@ $$
 ### Plots to Include
 
 - **Training Curve:**  
-  $$ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward} $$
+  $ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward} $
   
 - **Evaluation Curve:**  
   $$ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)} $$
