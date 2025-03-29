@@ -1,170 +1,112 @@
-# Off-Policy Reinforcement Learning Enhancements
 
-This repository contains implementations and experiments for an assignment in **Deep Decision Making and Reinforcement Learning (CSCI-GA 3033-090)**. The focus is on off-policy reinforcement learning using an actor-critic framework. In this project, we:
+# Off-Policy Reinforcement Learning Enhancements: A Comprehensive Study
 
-- Implement a DDPG-like algorithm for **RL Training Only**.
-- Combine **Behavior Cloning (BC)** with RL fine-tuning to improve sample efficiency.
-- Discuss RL variants such as **Double Q-learning** and **Dueling DQN**.
-- Implement a bonus **Soft Actor-Critic (SAC)** agent that learns its exploration noise online.
+## Abstract
 
----
+This repository presents a comprehensive study of off-policy reinforcement learning (RL) using an actor-critic framework, covering baseline DDPG-like training, behavior cloning (BC) pre-training with RL fine-tuning, exploration of advanced RL variants, and a bonus implementation of Soft Actor-Critic (SAC). Theoretical foundations and mathematical formulations are discussed along with experimental analyses.
 
-## Environment and Setup
+## Introduction
 
-The environment is a modified goal-reaching task conforming to the OpenAI Gym API. Key modifications include a fixed episode length (50) and modified reward functions. This repository is structured to work with the provided `conda_env.yml` and the modified `particle-envs`.
+Off-policy RL methods use data from previous interactions or other policies to update the current policy. We use an actor-critic approach, involving two neural networks: the critic (estimating Q-values) and the actor (policy network).
 
----
+## Methodology
 
-## Q1: RL Training Only
+### Baseline RL Training (DDPG-like Algorithm)
 
-### Theoretical Background
-
-The **Q-function** is defined as
-
+The critic estimates the Q-function:
 $$
-Q(s, a) = \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t \, r_t \,\middle|\, s_0 = s,\, a_0 = a\right].
+Q(s, a) = \mathbb{E}\left[ \sum_{t=0}^{\infty} \gamma^t r_t \middle| s_0 = s, a_0 = a 
+ight]
 $$
 
-During training, the critic is updated to minimize the temporal difference (TD) error:
-
+Critic updates minimize TD-error:
 $$
-L_{\text{critic}} = \mathbb{E}\left[\left(Q(s,a) - \left(r + \gamma\, Q_{\text{target}}(s', a')\right)\right)^2\right].
-$$
-
-The actor is updated to maximize the Q-value, which is equivalent to minimizing
-
-$$
-L_{\text{actor}} = -\mathbb{E}\left[ Q\big(s,\pi(s)\big) \right].
+L_{	ext{critic}} = \mathbb{E}\left[(Q(s,a)-(r+\gamma Q_{	ext{target}}(s',a')))^2
+ight]
 $$
 
-A target network is maintained for the critic to provide a stable target using soft updates:
-
+Actor updates maximize the critic's Q-values:
 $$
-\theta_{\text{target}} \leftarrow \tau\, \theta + (1-\tau)\, \theta_{\text{target}}.
-$$
-
-### Key Plots
-
-- **Training Curve:**  
-  $$x: \text{Frames (or Steps)} \quad y: \text{Episode Reward}$$
-
-- **Evaluation Curve:**  
-  $$x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)}$$
-
----
-
-## Q2: Behavior Cloning (BC) Training and RL Fine-Tuning
-
-### Theoretical Background
-
-To improve sample efficiency, the policy is first pre-trained using behavior cloning (BC) and then fine-tuned with RL. The **Behavior Cloning loss** is given by
-
-$$
-L_{\text{BC}} = \mathbb{E}\left[\|\pi(s) - a_{\text{expert}}\|^2\right].
+L_{	ext{actor}} = -\mathbb{E}[Q(s,\pi(s))]
 $$
 
-During fine-tuning, the overall actor loss becomes a combination of the RL and BC losses:
+### BC Training and RL Fine-Tuning
 
+Initial training uses behavior cloning (BC):
 $$
-L_{\text{actor}} = L_{\text{RL}} + \alpha\, L_{\text{BC}} = -\mathbb{E}\left[ Q\big(s,\pi(s)\big) \right] + \alpha\, \mathbb{E}\left[\|\pi(s) - a_{\text{expert}}\|^2\right],
-$$
-
-where $\alpha$ is a hyperparameter that balances the two terms.
-
-### Key Plots
-
-- **Evaluation Curve Comparison (RL vs. BC+RL):**  
-  $$x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)}$$
-
-- **(Optional) BC Loss Curve:**  
-  $$x: \text{Iterations} \quad y: L_{\text{BC}}$$
-
----
-
-## Q3: RL Variants
-
-### Discussion
-
-#### Double Q-Learning
-
-Double Q-learning addresses overestimation bias by decoupling the action selection from evaluation. The target is computed as
-
-$$
-y = r + \gamma\, Q_{\text{target}}\Big(s',\, \arg\max_{a'} Q(s',a';\theta_1);\theta_2\Big).
+L_{	ext{BC}} = \mathbb{E}[\|\pi(s) - a_{	ext{expert}}\|^2]
 $$
 
-#### Dueling DQN
-
-Dueling DQN decomposes the Q-value into a state-value function and an advantage function:
-
+Fine-tuning combines RL and BC objectives:
 $$
-Q(s,a) = V(s) + \left( A(s,a) - \frac{1}{|\mathcal{A}|}\sum_{a'} A(s,a') \right).
+L_{	ext{actor}} = -\mathbb{E}[Q(s,\pi(s))] + lpha \mathbb{E}[\|\pi(s) - a_{	ext{expert}}\|^2]
 $$
 
-#### Application to Actor-Critic
+### RL Variants
 
-While these methods were originally designed for discrete-action settings (e.g., DQN), similar ideas—such as using multiple critics or decomposing the value function—can help stabilize training in actor-critic frameworks by reducing overestimation bias and better isolating state values.
+- **Double Q-Learning:** Reduces overestimation:
+$$
+y = r + \gamma Q_{	ext{target}}(s', rg\max_{a'} Q(s',a';	heta_1);	heta_2)
+$$
 
-### (Optional) Plot
+- **Dueling DQN:** Decomposes Q-values:
+$$
+Q(s,a) = V(s) + \left(A(s,a) - rac{1}{|\mathcal{A}|}\sum_{a'}A(s,a')
+ight)
+$$
 
-- **Reward vs. Frames for Modified Architectures:**  
-  $$x: \text{Frames} \quad y: \text{Episode Reward}$$
+### Soft Actor-Critic (SAC)
 
----
+SAC uses a stochastic actor with entropy regularization. The actor outputs a mean and log-standard deviation:
+$$
+\pi(s) \sim \mathcal{N}(\mu(s), \sigma(s)^2)
+$$
 
-## Bonus: Soft Actor-Critic (SAC) Implementation
+Actor loss with entropy:
+$$
+L_{	ext{actor}} = \mathbb{E}[lpha\log\pi(a|s)-Q(s,a)]
+$$
 
-### Key Modifications for SAC
+Temperature parameter ($lpha$) is optimized by:
+$$
+L(lpha) = -lpha \mathbb{E}[\log\pi(a|s)+\mathcal{H}_{	ext{target}}]
+$$
 
-1. **Actor Network Changes:**
+Critic update includes entropy:
+$$
+y = r + \gamma(Q_{	ext{target}}(s',a')-lpha\log\pi(a'|s'))
+$$
 
-   The actor now outputs both a mean $\mu(s)$ and a log standard deviation $\log \sigma(s)$, forming a Gaussian policy:
+## Experiments
 
-   $$\pi(s) \sim \mathcal{N}\big(\mu(s),\, \sigma(s)^2\big).$$
+- **Training and Evaluation Curves** (Frames vs Episode Reward)
+- **BC Loss Curve** (optional for BC)
+- **Temperature ($lpha$) Plot** (optional for SAC)
 
-2. **Entropy Regularization:**
+## Setup
 
-   The actor loss is modified to include an entropy bonus:
+### Dependencies
 
-   $L_{\text{actor}} = \mathbb{E}\left[\alpha\, \log \pi(a|s) - Q(s,a)\right].$
+- Python 3.x, NumPy, SciPy, PyTorch
+- Pandas, Matplotlib, Hydra-core
+- Particle-envs
 
-3. **Temperature Parameter:**
+### Installation
 
-   Introduce a learnable temperature $\alpha$ that balances reward maximization and exploration. An optional loss for tuning $\alpha$ is:
+```bash
+conda env create -f conda_env.yml
+conda activate ddrl
+pip install -e particle-envs/
+```
 
-   $$L(\alpha) = -\alpha\, \mathbb{E}\left[\log \pi(a|s) + \mathcal{H}_{\text{target}}\right].$$
+### Run Experiments
 
-4. **Critic Target Update with Entropy:**
+- RL Only: `python train_rl.py`
+- BC+RL: `python train_bcrl.py`
+- SAC (Bonus): `python train_sac.py`
 
-   The critic target now incorporates the entropy term:
+## References
 
-   $$y = r + \gamma \left( Q_{\text{target}}(s',a') - \alpha\, \log \pi(a'|s') \right).$$
-
-### Key Plots
-
-- **Training & Evaluation Curves:**  
-  $$x: \text{Frames} \quad y: \text{Episode Reward}$$  
-  Compare SAC performance with the baseline RL.
-
-- **(Optional) Temperature Parameter Plot:**  
-  $$x: \text{Frames} \quad y: \alpha$$
-
----
-
-## Requirements and Running the Code
-
-### Requirements
-
-- Python 3.x  
-- $$\texttt{numpy},\ \texttt{scipy},\ \texttt{torch}$$  
-- $$\texttt{pandas},\ \texttt{matplotlib}$$  
-- $$\texttt{hydra-core}$$ (for configuration management)  
-- $$\texttt{particle-envs}$$ (for the environment)
-
-### Setup
-
-1. **Create the Conda Environment:**
-
-   ```bash
-   conda env create -f conda_env.yml
-   conda activate ddrl
+- Lillicrap et al. (2015), "Continuous control with deep reinforcement learning."
+- Haarnoja et al. (2018), "Soft actor-critic: Off-policy maximum entropy deep reinforcement learning."
+- Mnih et al. (2015), "Human-level control through deep reinforcement learning."
