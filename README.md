@@ -14,68 +14,43 @@ Off-policy RL methods use data from previous interactions or other policies to u
 ### Baseline RL Training (DDPG-like Algorithm)
 
 The critic estimates the Q-function:
-$$
-Q(s, a) = \mathbb{E}\left[ \sum_{t=0}^{\infty} \gamma^t r_t \middle| s_0 = s, a_0 = a 
-ight]
-$$
+$$Q(s, a) = \mathbb{E}\left[ \sum_{t=0}^{\infty} \gamma^t r_t \middle| s_0 = s, a_0 = a\right]$$
 
 Critic updates minimize TD-error:
-$$
-L_{	ext{critic}} = \mathbb{E}\left[(Q(s,a)-(r+\gamma Q_{	ext{target}}(s',a')))^2
-ight]
-$$
+$$L_{	ext{critic}} = \mathbb{E}\left[(Q(s,a)-(r+\gamma Q_{	ext{target}}(s',a')))^2\right]$$
 
 Actor updates maximize the critic's Q-values:
-$$
-L_{	ext{actor}} = -\mathbb{E}[Q(s,\pi(s))]
-$$
+$$L_{	ext{actor}} = -\mathbb{E}[Q(s,\pi(s))]$$
 
 ### BC Training and RL Fine-Tuning
 
 Initial training uses behavior cloning (BC):
-$$
-L_{	ext{BC}} = \mathbb{E}[\|\pi(s) - a_{	ext{expert}}\|^2]
-$$
+$$L_{	ext{BC}} = \mathbb{E}[\|\pi(s) - a_{	ext{expert}}\|^2]$$
 
 Fine-tuning combines RL and BC objectives:
-$$
-L_{	ext{actor}} = -\mathbb{E}[Q(s,\pi(s))] + lpha \mathbb{E}[\|\pi(s) - a_{	ext{expert}}\|^2]
-$$
+$$L_{	ext{actor}} = -\mathbb{E}[Q(s,\pi(s))] + lpha \mathbb{E}[\|\pi(s) - a_{	ext{expert}}\|^2]$$
 
 ### RL Variants
 
 - **Double Q-Learning:** Reduces overestimation:
-$$
-y = r + \gamma Q_{	ext{target}}(s', rg\max_{a'} Q(s',a';	heta_1);	heta_2)
-$$
+$$y = r + \gamma Q_{	ext{target}}(s', rg\max_{a'} Q(s',a';	heta_1);	heta_2)$$
 
 - **Dueling DQN:** Decomposes Q-values:
-$$
-Q(s,a) = V(s) + \left(A(s,a) - rac{1}{|\mathcal{A}|}\sum_{a'}A(s,a')
-ight)
-$$
+$$Q(s,a) = V(s) + \left(A(s,a) - rac{1}{|\mathcal{A}|}\sum_{a'}A(s,a')\right)$$
 
 ### Soft Actor-Critic (SAC)
 
 SAC uses a stochastic actor with entropy regularization. The actor outputs a mean and log-standard deviation:
-$$
-\pi(s) \sim \mathcal{N}(\mu(s), \sigma(s)^2)
-$$
+$$\pi(s) \sim \mathcal{N}(\mu(s), \sigma(s)^2)$$
 
 Actor loss with entropy:
-$$
-L_{	ext{actor}} = \mathbb{E}[lpha\log\pi(a|s)-Q(s,a)]
-$$
+$$L_{	ext{actor}} = \mathbb{E}[lpha\log\pi(a|s)-Q(s,a)]$$
 
 Temperature parameter ($lpha$) is optimized by:
-$$
-L(lpha) = -lpha \mathbb{E}[\log\pi(a|s)+\mathcal{H}_{	ext{target}}]
-$$
+$$L(lpha) = -lpha \mathbb{E}[\log\pi(a|s)+\mathcal{H}_{	ext{target}}]$$
 
 Critic update includes entropy:
-$$
-y = r + \gamma(Q_{	ext{target}}(s',a')-lpha\log\pi(a'|s'))
-$$
+$$y = r + \gamma(Q_{	ext{target}}(s',a')-lpha\log\pi(a'|s'))$$
 
 ## Experiments
 
