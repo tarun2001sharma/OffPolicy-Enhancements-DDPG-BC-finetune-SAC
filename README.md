@@ -16,141 +16,167 @@ The environment is a modified goal-reaching task conforming to the OpenAI Gym AP
 
 ## Q1: RL Training Only
 
-In the first part, we implement a basic off-policy actor-critic method inspired by DDPG. The key idea is to learn the **Q-value function** and a deterministic policy using deep networks.
+In the first part, we implement a basic off-policy actor-critic method inspired by DDPG.
 
 ### Theoretical Background
 
 The **Q-function** is defined as:
 
 $$
-Q(s, a) = \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s,\ a_0 = a\right]
+Q(s, a) = \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t \, r_t \,\middle|\, s_0 = s,\ a_0 = a\right]
 $$
 
 During training, the critic is updated to minimize the Temporal Difference (TD) error:
 
 $$
-L_{\text{critic}} = \mathbb{E}\Big[ \big(Q(s,a) - \Big(r + \gamma\, Q_{\text{target}}(s',a')\Big)\big)^2\Big]
+L_{\text{critic}} = \mathbb{E}\left[ \left(Q(s,a) - \left(r + \gamma\, Q_{\text{target}}(s',a')\right)\right)^2 \right]
 $$
 
-The actor is updated to maximize the Q-value:
+The actor is updated to maximize the Q-value, which is equivalent to minimizing:
 
 $$
-L_{\text{actor}} = -\mathbb{E}[Q(s,\pi(s))]
+L_{\text{actor}} = -\mathbb{E}\left[ Q(s,\pi(s)) \right]
 $$
 
-where the target network $Q_{\text{target}}$ is a slow-moving copy of the critic to improve stability.
+A **target network** is maintained for the critic to provide a stable target:
+
+$$
+Q_{\text{target}}(s', a') \quad \text{with soft updates:} \quad \theta_{\text{target}} \leftarrow \tau\, \theta + (1-\tau)\, \theta_{\text{target}}
+$$
 
 ### Plots to Include
 
 - **Training Curve:**  
-  $$ x: \text{Frame (or Steps)} \quad y: \text{Episode Reward} $$  
+  $$ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward} $$
+  
 - **Evaluation Curve:**  
-  $$ x: \text{Frame (or Steps)} \quad y: \text{Episode Reward (evaluation mode)} $$
+  $$ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)} $$
 
 ---
 
-## Q2: Behavior Cloning (BC) Training and RL Fine-Tuning
+## Q2: BC Training and RL Fine-Tuning
 
-To boost sample efficiency, we pre-train the actor using behavior cloning from expert data (provided in `bc.pkl`), and then fine-tune it with RL.
+To enhance sample efficiency, the policy is first pre-trained using behavior cloning (BC) and then fine-tuned with RL.
 
 ### Theoretical Background
 
-**Behavior Cloning (BC)** is a supervised learning approach. The BC loss is given by:
+The **Behavior Cloning (BC) loss** is:
 
 $$
-L_{\text{BC}} = \mathbb{E}\Big[\|\pi(s) - a_{\text{expert}}\|^2\Big]
+L_{\text{BC}} = \mathbb{E}\left[ \|\pi(s) - a_{\text{expert}}\|^2 \right]
 $$
 
-The combined actor loss during fine-tuning becomes:
+During fine-tuning, the actor loss becomes a combination of the RL objective and the BC loss:
 
 $$
-L_{\text{actor}} = L_{\text{RL}} + \alpha\, L_{\text{BC}} = -\mathbb{E}[Q(s,\pi(s))] + \alpha\, \mathbb{E}\Big[\|\pi(s) - a_{\text{expert}}\|^2\Big]
+L_{\text{actor}} = L_{\text{RL}} + \alpha\, L_{\text{BC}} = -\mathbb{E}\left[ Q(s,\pi(s)) \right] + \alpha\, \mathbb{E}\left[ \|\pi(s) - a_{\text{expert}}\|^2 \right]
 $$
 
-where $$ \alpha $$ is a hyperparameter balancing imitation and reward maximization.
+where $$ \alpha $$ is a hyperparameter balancing the two objectives.
 
 ### Plots to Include
 
-- **Evaluation Curve Comparison:**  
-  $$ x: \text{Frame (or Steps)} \quad y: \text{Episode Reward (evaluation mode)} $$  
-  Compare the performance of RL-only vs. BC+RL (BCRL).
-- **Optional:** A plot of BC loss vs. training iterations to show how quickly the actor learns from the expert.
+- **Evaluation Curve Comparison (RL vs. BC+RL):**  
+  $$ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)} $$
+  
+- **(Optional) BC Loss Curve:**  
+  $$ x: \text{Iterations} \quad y: L_{\text{BC}} $$
 
 ---
 
 ## Q3: RL Variants
 
-### Discussion
+### Discussion of RL Variants
 
-- **Double Q-Learning:**  
-  This method uses two Q-networks to reduce overestimation bias by decoupling the action selection and evaluation:
-  
-  $$ 
-  y = r + \gamma\, Q_{\text{target}}(s', \arg\max_{a'} Q(s',a';\theta_1); \theta_2)
-  $$
+#### Double Q-learning
 
-- **Dueling DQN:**  
-  In dueling architectures, the Q-value is decomposed into a state-value function and an advantage function:
-  
-  $$
-  Q(s,a) = V(s) + \left( A(s,a) - \frac{1}{|\mathcal{A}|}\sum_{a'} A(s,a') \right)
-  $$
+Double Q-learning addresses the overestimation bias by decoupling action selection from action evaluation. The target is computed as:
 
-### Application in Actor-Critic
+$$
+y = r + \gamma\, Q_{\text{target}}\Big(s',\, \arg\max_{a'} Q(s',a';\theta_1);\theta_2\Big)
+$$
 
-While these methods were initially proposed for DQN, similar ideas (e.g., using two critics) may help stabilize actor-critic methods. However, their integration is non-trivial due to the continuous action space.
+#### Dueling DQN
+
+Dueling DQN decomposes the Q-value into a state-value function and an advantage function:
+
+$$
+Q(s,a) = V(s) + \left( A(s,a) - \frac{1}{|\mathcal{A}|} \sum_{a'} A(s,a') \right)
+$$
+
+#### Application to Actor-Critic
+
+While these variants were originally designed for discrete-action settings (DQN), similar ideas (e.g., using two critics) can potentially stabilize training in actor-critic frameworks by reducing overestimation bias and better isolating state values.
+
+### Plots (if Experimented)
+
+- **Standard Reward vs. Frames** for any modified architecture.  
+  $$ x: \text{Frames} \quad y: \text{Episode Reward} $$
 
 ---
 
 ## Bonus: Soft Actor-Critic (SAC) Implementation
 
-The bonus task is to implement **SAC**, which replaces a fixed exploration standard deviation with a learned one and introduces an entropy term in the actor’s objective.
+The bonus task is to implement SAC, which learns the standard deviation (i.e., exploration noise) and incorporates an entropy bonus.
 
 ### Key Modifications for SAC
 
-1. **Actor Network Output:**  
-   Instead of a fixed standard deviation, the actor outputs both a mean $$ \mu(s) $$ and a log standard deviation $$ \log \sigma(s) $$:
+1. **Actor Network Changes:**
+
+   The actor now outputs both a mean $$ \mu(s) $$ and a log standard deviation $$ \log \sigma(s) $$:
 
    $$
    \pi(s) \sim \mathcal{N}\big(\mu(s),\, \sigma(s)^2\big)
    $$
 
-2. **Entropy Regularization:**  
-   The actor loss is augmented by an entropy bonus:
+2. **Entropy Regularization in Actor Loss:**
+
+   The actor loss becomes:
 
    $$
-   L_{\text{actor}} = \mathbb{E}\Big[\alpha\, \log \pi(a|s) - Q(s,a)\Big]
+   L_{\text{actor}} = \mathbb{E}\left[\alpha\, \log \pi(a|s) - Q(s,a)\right]
    $$
 
-3. **Temperature Parameter:**  
-   Introduce a learnable temperature $$ \alpha $$ (or keep it fixed), with optional automatic tuning. One common approach is to minimize:
+3. **Temperature Parameter:**
+
+   Introduce a temperature $$ \alpha $$ (learned via:
 
    $$
-   L(\alpha) = -\alpha\, \mathbb{E}\Big[\log \pi(a|s) + \mathcal{H}_{\text{target}}\Big]
+   L(\alpha) = -\alpha\, \mathbb{E}\left[\log \pi(a|s) + \mathcal{H}_{\text{target}}\right]
    $$
 
-4. **Critic Update:**  
-   The target for the critic includes the entropy term:
+   ) which balances reward maximization and entropy (exploration).
+
+4. **Critic Target Update with Entropy Term:**
+
+   The target for the critic is now computed as:
 
    $$
-   y = r + \gamma \Big(Q_{\text{target}}(s', a') - \alpha\, \log \pi(a'|s')\Big)
+   y = r + \gamma \Big( Q_{\text{target}}(s', a') - \alpha\, \log \pi(a'|s') \Big)
    $$
 
 ### Plots to Include
 
-- **Training & Evaluation Curves:**  
-  $$ x: \text{Frame (or Steps)} \quad y: \text{Episode Reward} $$
-- **Optional:** Temperature parameter $$ \alpha $$ over time:
+- **Training and Evaluation Curves:**  
+  $$ x: \text{Frames} \quad y: \text{Episode Reward} $$  
+  Compare SAC against the baseline RL.
   
-  $$ x: \text{Frame (or Steps)} \quad y: \alpha $$
+- **(Optional) Temperature Parameter Plot:**  
+  $$ x: \text{Frames} \quad y: \alpha $$
 
 ---
 
-## How to Run
+## Requirements and Running the Code
 
-1. **Setup Environment:**  
-   Use the provided `conda_env.yml` to create and activate your environment.
-   
+### Requirements
+- Python 3.x
+- `numpy`, `scipy`, `torch`
+- `pandas`, `matplotlib`
+- `hydra-core` (for configuration management)
+- `particle-envs` (for the environment)
+
+### Setup
+1. Create the conda environment:
    ```bash
    conda env create -f conda_env.yml
    conda activate ddrl
