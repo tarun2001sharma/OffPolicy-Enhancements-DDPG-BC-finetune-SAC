@@ -81,30 +81,22 @@ SAC is an off-policy algorithm that incorporates maximum entropy reinforcement l
 1. **Actor Network Changes:**  
    The actor now outputs both a mean $\mu(s)$ and a log standard deviation $\log \sigma(s)$, defining a Gaussian policy:
 
-   $$
-   \pi(s) \sim \mathcal{N}\big(\mu(s),\, \sigma(s)^2\big).
-   $$
+   $$\pi(s) \sim \mathcal{N}\big(\mu(s),\, \sigma(s)^2\big).$$
 
 2. **Entropy Regularization:**  
    The actor loss includes an entropy bonus to encourage exploration:
 
-   $$
-   L_{\text{actor}} = \mathbb{E}\left[\alpha\, \log \pi(a|s) - Q(s,a)\right].
-   $$
+   $$L_{\text{actor}} = \mathbb{E}\left[\alpha\, \log \pi(a|s) - Q(s,a)\right].$$
 
 3. **Temperature Parameter:**  
    A learnable temperature parameter $\alpha$ balances the trade-off between reward maximization and entropy. An auxiliary loss for tuning $\alpha$ is:
 
-   $$
-   L(\alpha) = -\alpha\, \mathbb{E}\left[\log \pi(a|s) + \mathcal{H}_{\text{target}}\right].
-   $$
+   $$L(\alpha) = -\alpha\, \mathbb{E}\left[\log \pi(a|s) + \mathcal{H}_{\text{target}}\right].$$
 
 4. **Critic Target Update with Entropy:**  
    The critic target incorporates the entropy term:
 
-   $$
-   y = r + \gamma \left( Q_{\text{target}}(s',a') - \alpha\, \log \pi(a'|s') \right).
-   $$
+   $$y = r + \gamma \left( Q_{\text{target}}(s',a') - \alpha\, \log \pi(a'|s') \right).$$
 
 ## Experiments and Evaluation
 
