@@ -46,10 +46,10 @@ $$
 ### Key Plots
 
 - **Training Curve:**  
-  $$ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward} $$
+  $$x: \text{Frames (or Steps)} \quad y: \text{Episode Reward}$$
 
 - **Evaluation Curve:**  
-  $$ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)} $$
+  $$x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)}$$
 
 ---
 
@@ -74,10 +74,10 @@ where $\alpha$ is a hyperparameter that balances the two terms.
 ### Key Plots
 
 - **Evaluation Curve Comparison (RL vs. BC+RL):**  
-  $$ x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)} $$
+  $$x: \text{Frames (or Steps)} \quad y: \text{Episode Reward (evaluation mode)}$$
 
 - **(Optional) BC Loss Curve:**  
-  $$ x: \text{Iterations} \quad y: L_{\text{BC}} $$
+  $$x: \text{Iterations} \quad y: L_{\text{BC}}$$
 
 ---
 
@@ -108,7 +108,7 @@ While these methods were originally designed for discrete-action settings (e.g.,
 ### (Optional) Plot
 
 - **Reward vs. Frames for Modified Architectures:**  
-  $$ x: \text{Frames} \quad y: \text{Episode Reward} $$
+  $$x: \text{Frames} \quad y: \text{Episode Reward}$$
 
 ---
 
@@ -132,26 +132,22 @@ While these methods were originally designed for discrete-action settings (e.g.,
 
    Introduce a learnable temperature $\alpha$ that balances reward maximization and exploration. An optional loss for tuning $\alpha$ is:
 
-   $$
-   L(\alpha) = -\alpha\, \mathbb{E}\left[\log \pi(a|s) + \mathcal{H}_{\text{target}}\right].
-   $$
+   $$L(\alpha) = -\alpha\, \mathbb{E}\left[\log \pi(a|s) + \mathcal{H}_{\text{target}}\right].$$
 
 4. **Critic Target Update with Entropy:**
 
    The critic target now incorporates the entropy term:
 
-   $$
-   y = r + \gamma \left( Q_{\text{target}}(s',a') - \alpha\, \log \pi(a'|s') \right).
-   $$
+   $$y = r + \gamma \left( Q_{\text{target}}(s',a') - \alpha\, \log \pi(a'|s') \right).$$
 
 ### Key Plots
 
 - **Training & Evaluation Curves:**  
-  $$ x: \text{Frames} \quad y: \text{Episode Reward} $$  
+  $$x: \text{Frames} \quad y: \text{Episode Reward}$$  
   Compare SAC performance with the baseline RL.
 
 - **(Optional) Temperature Parameter Plot:**  
-  $$ x: \text{Frames} \quad y: \alpha $$
+  $$x: \text{Frames} \quad y: \alpha$$
 
 ---
 
