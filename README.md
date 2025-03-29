@@ -24,9 +24,9 @@ The environment is a goal-reaching task (a modified version of the Assignment 1 
 #### Theoretical Background
 
 The Q-value function is defined as:
-$$
+$
 Q(s, a) = \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s, a_0 = a\right]
-$$
+$
 This function represents the expected cumulative (discounted) reward when starting in state $$ s $$, taking action $$ a $$, and following the current policy thereafter.
 
 The critic is updated using a loss function that minimizes the difference between its predicted Q-value and a target value computed by:
