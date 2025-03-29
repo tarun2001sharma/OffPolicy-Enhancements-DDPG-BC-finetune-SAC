@@ -120,17 +120,13 @@ While these methods were originally designed for discrete-action settings (e.g.,
 
    The actor now outputs both a mean $\mu(s)$ and a log standard deviation $\log \sigma(s)$, forming a Gaussian policy:
 
-   $$
-   \pi(s) \sim \mathcal{N}\big(\mu(s),\, \sigma(s)^2\big).
-   $$
+   $$\pi(s) \sim \mathcal{N}\big(\mu(s),\, \sigma(s)^2\big).$$
 
 2. **Entropy Regularization:**
 
    The actor loss is modified to include an entropy bonus:
 
-   $$
-   L_{\text{actor}} = \mathbb{E}\left[\alpha\, \log \pi(a|s) - Q(s,a)\right].
-   $$
+   $L_{\text{actor}} = \mathbb{E}\left[\alpha\, \log \pi(a|s) - Q(s,a)\right].$
 
 3. **Temperature Parameter:**
 
